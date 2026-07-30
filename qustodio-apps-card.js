@@ -32,6 +32,14 @@ class QustodioAppsCard extends HTMLElement {
     });
   }
 
+  _stopTime(child) {
+    // Remet le bonus de temps extra à zéro.
+    // Adaptez le nom du script/service ci-dessous si besoin.
+    this._hass.callService('script', 'qustodio_reset_extra_time_bonus', {
+      enfant: child
+    });
+  }
+
   _render() {
     if (!this._state) return;
 
@@ -77,6 +85,8 @@ class QustodioAppsCard extends HTMLElement {
         used: "Utilisé",
         remaining: "Restant",
         addTime: "Ajouter du temps :",
+        stop: "STOP",
+        stopTitle: "Remettre le bonus à zéro",
         noApps: "Aucune application utilisée aujourd'hui",
         min: "min",
         h30: "1h30",
@@ -87,6 +97,8 @@ class QustodioAppsCard extends HTMLElement {
         used: "Used",
         remaining: "Remaining",
         addTime: "Add extra time:",
+        stop: "STOP",
+        stopTitle: "Reset bonus to zero",
         noApps: "No applications used today",
         min: "min",
         h30: "1h30",
@@ -97,6 +109,8 @@ class QustodioAppsCard extends HTMLElement {
         used: "Usado",
         remaining: "Restante",
         addTime: "Añadir tiempo:",
+        stop: "STOP",
+        stopTitle: "Restablecer el bono a cero",
         noApps: "No se usaron aplicaciones hoy",
         min: "min",
         h30: "1h30",
@@ -107,6 +121,8 @@ class QustodioAppsCard extends HTMLElement {
         used: "Genutzt",
         remaining: "Verbleibend",
         addTime: "Zeit hinzufügen:",
+        stop: "STOP",
+        stopTitle: "Bonus auf Null zurücksetzen",
         noApps: "Heute aucune application utilisée",
         min: "Min",
         h30: "1h30",
@@ -132,7 +148,7 @@ class QustodioAppsCard extends HTMLElement {
                   <span style="font-size:13px;font-weight:${isTop ? 600 : 400}">
                     ${app.name}
                   </span>
-                  <span style="font-size:12px;color:#888;font-weight:${isTop ? 600 : 400}">
+                  <span style="font-size:12px;color:#666;font-weight:${isTop ? 600 : 400}">
                     ${app.minutes} ${t.min}
                   </span>
                 </div>
@@ -156,21 +172,21 @@ class QustodioAppsCard extends HTMLElement {
 
           <div style="display:flex;gap:8px;margin-bottom:14px">
             <div style="flex:1;text-align:center;background:var(--card-background-color);border-radius:10px;padding:10px">
-              <div style="font-size:14px;color:#888">${t.quota}</div>
+              <div style="font-size:11px;color:#888">${t.quota}</div>
               <div style="font-size:20px;font-weight:600;color:#1D9E75">
                 ${Math.round(quota)} ${t.min}
               </div>
             </div>
 
             <div style="flex:1;text-align:center;background:var(--card-background-color);border-radius:10px;padding:10px">
-              <div style="font-size:14px;color:#888">${t.used}</div>
-              <div style="font-size:20px;font-weight:600;color:#888">
+              <div style="font-size:11px;color:#888">${t.used}</div>
+              <div style="font-size:20px;font-weight:600;color:#333">
                 ${Math.round(timeUsed)} ${t.min}
               </div>
             </div>
 
             <div style="flex:1;text-align:center;background:var(--card-background-color);border-radius:10px;padding:10px">
-              <div style="font-size:14px;color:#888">${t.remaining}</div>
+              <div style="font-size:11px;color:#888">${t.remaining}</div>
               <div style="font-size:20px;font-weight:600;color:#E24B4A">
                 ${Math.round(remaining)} ${t.min}
               </div>
@@ -198,6 +214,11 @@ class QustodioAppsCard extends HTMLElement {
             <button id="btn-validate" style="display:flex;align-items:center;justify-content:center;background:var(--primary-color);border:none;border-radius:6px;padding:6px 12px;cursor:pointer;outline:none;">
               <ha-icon icon="mdi:plus" style="color:white;--mdc-icon-size:20px;"></ha-icon>
             </button>
+
+            <button id="btn-stop" title="${t.stopTitle}" style="display:flex;align-items:center;justify-content:center;gap:4px;background:#E24B4A;border:none;border-radius:6px;padding:6px 10px;cursor:pointer;outline:none;">
+              <ha-icon icon="mdi:stop" style="color:white;--mdc-icon-size:18px;"></ha-icon>
+              <span style="color:white;font-size:12px;font-weight:600;">${t.stop}</span>
+            </button>
           </div>
 
           ${appsHtml}
@@ -207,10 +228,17 @@ class QustodioAppsCard extends HTMLElement {
 
     const select = this.querySelector('#time-selector');
     const btn = this.querySelector('#btn-validate');
+    const btnStop = this.querySelector('#btn-stop');
 
     if (btn && select) {
       btn.onclick = () => {
         this._addTime(childName, select.value);
+      };
+    }
+
+    if (btnStop) {
+      btnStop.onclick = () => {
+        this._stopTime(childName);
       };
     }
   }
